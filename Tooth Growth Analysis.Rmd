@@ -20,22 +20,27 @@ str(ToothGrowth)
 ##Exploratory Analysis
 Here is a plot of the data showing behavior trends in tooth growth factored by supplement.
 
-```{r "plot"}
+```{r "plot", warning=FALSE, fig.height=4, fig.width=6}
 require(ggplot2)
 
-ggplot(ToothGrowth, aes(x=dose, y = len))+geom_point(size = 2)+facet_grid(. ~ supp)+geom_smooth()
+ggplot(ToothGrowth, aes(x=dose, y = len))+geom_point(size = 5, colour="red")+geom_point(size = 4, colour="lightblue")+facet_grid(. ~ supp)
 
 
 ```
 
 A summary of the data:  
-`r summary(ToothGrowth)`  
+```{r "summary", echo=FALSE}
+summary(ToothGrowth)
+```  
 shows the data appear to be well behaved (10 unpaired observations at each condition) and do not require cleaning for this anlaysis.
 
-`r head(ToothGrowth)
+```{r "dataheaderX", echo=FALSE}
+###display the header of the data 
+head(ToothGrowth, n=5)
+```
 
 ##Confidence Intervals
-The first step is to look at the statistical significance of the shift in the data. There are six pair-wise comparisons that make sense, three for each supplement.
+The first step is to look at the statistical significance of the shift in the data. I just pick some random pairs to test below.
 
 To keep the analysis part clean, first split up the data by Supplement and Dose
 
@@ -53,7 +58,10 @@ To keep the analysis part clean, first split up the data by Supplement and Dose
 
 ```
 
-###Vitamin C
+
+##Confidence Interval Analysis
+
+##Within Vitamin C Data
 
 ####Dose0.5 to Dose1.0
 
@@ -65,11 +73,11 @@ ucb<-a$conf.int[2]
 
 ```
 
-The confidence interval differents between tooth length at these doses is `r lcb` to `r ucb` which `r if(ucb-lcb>abs(ucb)-abs(lcb)) {"does"} else {"does not"}` contain 0.
-
+The confidence interval differents between tooth length at these doses is `r lcb` to `r ucb` which `r if(ucb-lcb>abs(ucb)-abs(lcb)) {"does"} else {"does not"}` contain 0.  
+   
 ####Dose1.0 to Dose2.0
 
-```{r "compare2"}
+```{r "compare2", echo=FALSE}
 
 a<- t.test(VC20$len, VC10$len, paried=FALSE)
 lcb<-a$conf.int[1]
@@ -77,22 +85,10 @@ ucb<-a$conf.int[2]
 
 ```
 
-The confidence interval differents between tooth length at these doses is `r lcb` to `r ucb` which `r if(ucb-lcb>abs(ucb)-abs(lcb)) {"does"} else {"does not"}` contain 0.
-
-####Dose0.5 to Dose2.0
-
-```{r "compare3"}
-
-a<- t.test(VC20$len, VC05$len, paried=FALSE)
-lcb<-a$conf.int[1]
-ucb<-a$conf.int[2]
-
-```
-
-The confidence interval differents between tooth length at these doses is `r lcb` to `r ucb` which `r if(ucb-lcb>abs(ucb)-abs(lcb)) {"does"} else {"does not"}` contain 0.
+The confidence interval difference between tooth length at these doses is `r lcb` to `r ucb` which `r if(ucb-lcb>abs(ucb)-abs(lcb)) {"does"} else {"does not"}` contain 0.
 
 
-###Orange Juice
+##Within Orange Juice
 
 ####Dose0.5 to Dose1.0
 
@@ -104,28 +100,70 @@ ucb<-a$conf.int[2]
 
 ```
 
-The confidence interval differents between tooth length at these doses is `r lcb` to `r ucb` which `r if(ucb-lcb>abs(ucb)-abs(lcb)) {"does"} else {"does not"}` contain 0.
+The confidence interval difference between tooth length at these doses is `r lcb` to `r ucb` which `r if(ucb-lcb>abs(ucb)-abs(lcb)) {"does"} else {"does not"}` contain 0.
 
-####Dose1.0 to Dose2.0
+##Orange Juice to Vitamin C
 
-```{r "compare5"}
+####Dose1.0 to Dose1.0
 
-a<- t.test(OJ20$len, OJ10$len, paried=FALSE)
+```{r "compare7"}
+
+a<- t.test(OJ10$len, VC10$len, paried=FALSE)
 lcb<-a$conf.int[1]
 ucb<-a$conf.int[2]
 
 ```
 
-The confidence interval differents between tooth length at these doses is `r lcb` to `r ucb` which `r if(ucb-lcb>abs(ucb)-abs(lcb)) {"does"} else {"does not"}` contain 0.
+The confidence interval difference between tooth length from the Orange Juice and Vitamin C at doses of 1.0 is `r lcb` to `r ucb` which `r if(ucb-lcb>abs(ucb)-abs(lcb)) {"does"} else {"does not"}` contain 0.
 
-####Dose0.5 to Dose2.0
 
-```{r "compare6"}
+####Conclusion  
+In all the cases above the shifts in the mean, both with increasing dose and the comparison of Vitamin C to Orange Juice are significant. 
 
-a<- t.test(OJ20$len, OJ05$len, paried=FALSE)
-lcb<-a$conf.int[1]
-ucb<-a$conf.int[2]
+
+##Hypothesis Testing
+
+###Hypothesis to be tested. 
+Orange Juice at a dose of 1.0 is more effective (produces more tooth growth) than Vitamin C.
+
+```{r "try something different"}
+require(datasets)
+data(toothGrowth)
+require(reshape2)
+
+wideTG<-dcast(ToothGrowth, dose + supp ~ 1:10, value.var="len")
+
+wideTG20 <- subset(wideTG, dose==2.0)
 
 ```
 
-The confidence interval differents between tooth length at these doses is `r lcb` to `r ucb` which `r if(ucb-lcb>abs(ucb)-abs(lcb)) {"does"} else {"does not"}` contain 0.
+###alt test of 2.0
+
+```{r "alt test 20"}
+
+#t.test(1:10~supp, paired=FALSE, var.equal=TRUE, data=wideTG20)
+
+```
+
+####Test at dose of 1.0.  
+
+```{r "hypothesis"}
+b<-t.test(OJ10$len, VC10$len, paired=FALSE)
+
+```
+
+The anlaysis shows that for`r substring(b$data.name,1,4)` and `r substring(b$data.name,14,17)` using the `r b$method` the t-statistic is `r b$parameter` and the confidence interval is `r b$conf.int[1]` and `r b$conf.int[2]`.
+
+####Test at dose of 2.0
+
+```{r "hypothesis2"}
+b<-t.test(OJ20$len, VC20$len, paired=FALSE)
+
+```
+
+The anlaysis shows that for`r substring(b$data.name,1,4)` and `r substring(b$data.name,14,17)` using the `r b$method` the t-statistic is `r b$parameter` and the confidence interval is `r b$conf.int[1]` and `r b$conf.int[2]`.
+
+##Conclusion
+The hypothesis 
+
+##Assumptions
