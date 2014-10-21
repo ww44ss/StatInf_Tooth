@@ -19,7 +19,7 @@ wideTG<-dcast(ToothGrowth, dose + supp ~ sample, value.var="len")
 
 ```{r "alt test 20"}
 
-t.test(len~dose, paired=FALSE, var.equal=TRUE, data=wideTG20)
+t.test(sample~supp, paired=FALSE, var.equal=TRUE, data = wideTG20)
 
 ```
 

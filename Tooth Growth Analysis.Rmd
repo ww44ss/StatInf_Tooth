@@ -1,9 +1,12 @@
 ---
-title: "Tooth Growth Analysis: Correlation with diet and Vitamin C"
+title: 'Tooth Growth Analysis: Correlation with diet and Vitamin C'
 author: "Winston"
 date: "October 21, 2014"
-output: pdf_document
+output: word_document
 ---
+
+####Note to reader
+This .pdf may look at bit strange because just as I was finishing I upgraded my Mac OS to Yosemite. The LaTeX version seemed to stop working with RPubs. So I saved as a word file and the saved that as a .pdf, which I uploaded.
 
 ##Get the data and take a quick look at it
 
@@ -20,7 +23,7 @@ str(ToothGrowth)
 ##Exploratory Analysis
 Here is a plot of the data showing behavior trends in tooth growth factored by supplement.
 
-```{r "plot", warning=FALSE, fig.height=4, fig.width=6}
+```{r "plot", warning=FALSE, fig.height=3, fig.width=4}
 require(ggplot2)
 
 ggplot(ToothGrowth, aes(x=dose, y = len))+geom_point(size = 5, colour="red")+geom_point(size = 4, colour="lightblue")+facet_grid(. ~ supp)
@@ -39,8 +42,8 @@ shows the data appear to be well behaved (10 unpaired observations at each condi
 head(ToothGrowth, n=5)
 ```
 
-##Confidence Intervals
-The first step is to look at the statistical significance of the shift in the data. I just pick some random pairs to test below.
+##Confidence Interval Analysis
+The first step is to look at the statistical significance of the shift in the data with increasing dose. The conclusion after looking at all the pairs is that there is an upward trend (meaning higher doses correlate to statistically significant higher length) among all the data.  
 
 To keep the analysis part clean, first split up the data by Supplement and Dose
 
@@ -58,10 +61,8 @@ To keep the analysis part clean, first split up the data by Supplement and Dose
 
 ```
 
-
-##Confidence Interval Analysis
-
 ##Within Vitamin C Data
+Some smaple anlaysis
 
 ####Dose0.5 to Dose1.0
 
@@ -89,6 +90,7 @@ The confidence interval difference between tooth length at these doses is `r lcb
 
 
 ##Within Orange Juice
+We can draw a similar conclusion that the correlation of increased does and tooth length is significnat statistically.  
 
 ####Dose0.5 to Dose1.0
 
@@ -101,8 +103,6 @@ ucb<-a$conf.int[2]
 ```
 
 The confidence interval difference between tooth length at these doses is `r lcb` to `r ucb` which `r if(ucb-lcb>abs(ucb)-abs(lcb)) {"does"} else {"does not"}` contain 0.
-
-##Orange Juice to Vitamin C
 
 ####Dose1.0 to Dose1.0
 
@@ -124,46 +124,35 @@ In all the cases above the shifts in the mean, both with increasing dose and the
 ##Hypothesis Testing
 
 ###Hypothesis to be tested. 
-Orange Juice at a dose of 1.0 is more effective (produces more tooth growth) than Vitamin C.
 
-```{r "try something different"}
-require(datasets)
-data(toothGrowth)
-require(reshape2)
-
-wideTG<-dcast(ToothGrowth, dose + supp ~ 1:10, value.var="len")
-
-wideTG20 <- subset(wideTG, dose==2.0)
-
-```
-
-###alt test of 2.0
-
-```{r "alt test 20"}
-
-#t.test(1:10~supp, paired=FALSE, var.equal=TRUE, data=wideTG20)
-
-```
+Orange Juice is more effective (produces more tooth growth) than Vitamin C.
 
 ####Test at dose of 1.0.  
 
 ```{r "hypothesis"}
-b<-t.test(OJ10$len, VC10$len, paired=FALSE)
+b<-t.test(OJ10$len, VC10$len, paired=FALSE, var.equal=TRUE)
 
 ```
 
-The anlaysis shows that for`r substring(b$data.name,1,4)` and `r substring(b$data.name,14,17)` using the `r b$method` the t-statistic is `r b$parameter` and the confidence interval is `r b$conf.int[1]` and `r b$conf.int[2]`.
+The anlaysis shows that for `r substring(b$data.name,1,4)` and `r substring(b$data.name,14,17)` using the `r b$method` the t-statistic is `r b$parameter` and the confidence interval is `r b$conf.int[1]` and `r b$conf.int[2]`.
 
 ####Test at dose of 2.0
 
 ```{r "hypothesis2"}
-b<-t.test(OJ20$len, VC20$len, paired=FALSE)
+b<-t.test(OJ20$len, VC20$len, paired=FALSE, var.equal=TRUE)
 
 ```
 
-The anlaysis shows that for`r substring(b$data.name,1,4)` and `r substring(b$data.name,14,17)` using the `r b$method` the t-statistic is `r b$parameter` and the confidence interval is `r b$conf.int[1]` and `r b$conf.int[2]`.
-
-##Conclusion
-The hypothesis 
+The anlaysis shows that for `r substring(b$data.name,1,4)` and `r substring(b$data.name,14,17)` using the `r b$method` the t-statistic is `r b$parameter` and the confidence interval is `r b$conf.int[1]` and `r b$conf.int[2]`.
 
 ##Assumptions
+
+Here I assume that the variances of the distributions are equal between the Orange Juice and the Vitamin C populations. 
+
+##Conclusion
+The hypothesis that Orange Juice is more effective than Vitamin C in tooth length increases is **FALSE** since at higher doses the difference in the outcome includes zero. 
+
+However, at lower doses, it does appear Orange Juice is more effective. 
+
+
+
